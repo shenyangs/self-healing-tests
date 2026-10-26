@@ -1,0 +1,97 @@
+{
+  "project": "self-healing-tests",
+  "state": "PASS",
+  "scenario": "Real local fixture red \u2192 inspect DOM \u2192 one allowlisted locator edit \u2192 same assertion green",
+  "checks": [
+    {
+      "id": "build",
+      "passed": true,
+      "evidence": "artifacts/build.log"
+    },
+    {
+      "id": "six-patch-guardrail-unit-tests",
+      "passed": true,
+      "evidence": "artifacts/test.log"
+    },
+    {
+      "id": "three-e2e-tests-including-reset-and-v1-v2",
+      "passed": true,
+      "evidence": "artifacts/e2e.log"
+    },
+    {
+      "id": "independent-recorded-demo",
+      "passed": true,
+      "evidence": "artifacts/demo.log"
+    },
+    {
+      "id": "expected-red-exit-1",
+      "passed": true,
+      "evidence": "artifacts/red/result.json"
+    },
+    {
+      "id": "repaired-green-exit-0",
+      "passed": true,
+      "evidence": "artifacts/green/result.json"
+    },
+    {
+      "id": "actual-locator-only-diff",
+      "passed": true,
+      "evidence": "artifacts/green/repair.diff"
+    },
+    {
+      "id": "final-dashboard-screenshot",
+      "passed": true,
+      "evidence": "artifacts/verified.png"
+    }
+  ],
+  "commands": [
+    {
+      "cmd": "npm install --cache .npm-cache",
+      "exitCode": 0
+    },
+    {
+      "cmd": "npm run e2e (initial missing FFmpeg attempt)",
+      "exitCode": 1
+    },
+    {
+      "cmd": "npm run demo (suggestion cleanup race, subsequently fixed)",
+      "exitCode": 1
+    },
+    {
+      "cmd": "npm run build",
+      "exitCode": 0
+    },
+    {
+      "cmd": "npm run test",
+      "exitCode": 0
+    },
+    {
+      "cmd": "npm run e2e",
+      "exitCode": 0
+    },
+    {
+      "cmd": "npm run demo",
+      "exitCode": 0
+    }
+  ],
+  "liveModel": false,
+  "fixturesUsed": true,
+  "demoVideo": "artifacts/playwright/demo-real-red-\u2192-locator-only-repair-\u2192-green/video.webm",
+  "limitations": [
+    "HEURISTIC / NO AI; no live model integration or inference.",
+    "Single known locator rename in a synthetic local fixture, not general self-healing.",
+    "Single in-memory workflow; fixed artifact paths are replaced on rerun.",
+    "Validation reused an existing Chromium executable read-only through PLAYWRIGHT_EXECUTABLE_PATH and project-local FFmpeg.",
+    "Fresh-machine full browser download was interrupted; fresh installation and other operating systems remain unverified."
+  ],
+  "verificationEnvironment": {
+    "browser": "existing Chromium headless shell via PLAYWRIGHT_EXECUTABLE_PATH",
+    "ffmpeg": "project-local .browsers/ffmpeg-1013",
+    "date": "2026-10-26"
+  },
+  "priorFailureEvidence": [
+    "artifacts/e2e-attempt-1.log",
+    "artifacts/demo-race-failure.log",
+    "artifacts/playwright-race-failure/"
+  ]
+}

@@ -9,3 +9,5 @@ test-results/
 
 .browsers/
 .npm-cache/
+
+.doctor-video/

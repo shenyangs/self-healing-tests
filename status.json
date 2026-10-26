@@ -1,60 +1,70 @@
 {
   "project": "self-healing-tests",
   "state": "PASS",
-  "scenario": "Real local fixture red \u2192 inspect DOM \u2192 one allowlisted locator edit \u2192 same assertion green",
+  "scenario": "中文界面：真实本地样例失败 → 页面检查 → 一个指定定位器修改 → 同一保存断言通过",
   "checks": [
     {
-      "id": "build",
+      "id": "中文构建",
       "passed": true,
-      "evidence": "artifacts/build.log"
+      "evidence": "artifacts/zh-build.log"
     },
     {
-      "id": "six-patch-guardrail-unit-tests",
+      "id": "7项单元测试与缺依赖诊断",
       "passed": true,
-      "evidence": "artifacts/test.log"
+      "evidence": "artifacts/zh-test.log"
     },
     {
-      "id": "three-e2e-tests-including-reset-and-v1-v2",
+      "id": "4项端到端测试含中文小屏键盘",
       "passed": true,
-      "evidence": "artifacts/e2e.log"
+      "evidence": "artifacts/zh-e2e.log"
     },
     {
-      "id": "independent-recorded-demo",
+      "id": "独立中文录屏演示",
       "passed": true,
-      "evidence": "artifacts/demo.log"
+      "evidence": "artifacts/zh-demo.log"
     },
     {
-      "id": "expected-red-exit-1",
+      "id": "真实浏览器与端口诊断",
       "passed": true,
-      "evidence": "artifacts/red/result.json"
+      "evidence": "artifacts/zh-doctor.log"
     },
     {
-      "id": "repaired-green-exit-0",
+      "id": "缺依赖中文恢复指引",
       "passed": true,
-      "evidence": "artifacts/green/result.json"
+      "evidence": "artifacts/zh-doctor-missing.log"
     },
     {
-      "id": "actual-locator-only-diff",
+      "id": "npm-ci锁文件安装",
       "passed": true,
-      "evidence": "artifacts/green/repair.diff"
+      "evidence": "artifacts/zh-install.log"
     },
     {
-      "id": "final-dashboard-screenshot",
+      "id": "中文桌面截图",
       "passed": true,
       "evidence": "artifacts/verified.png"
+    },
+    {
+      "id": "中文窄屏截图",
+      "passed": true,
+      "evidence": "artifacts/zh-mobile.png"
+    },
+    {
+      "id": "真实一行源码差异",
+      "passed": true,
+      "evidence": "artifacts/green/repair.diff"
     }
   ],
   "commands": [
     {
-      "cmd": "npm install --cache .npm-cache",
+      "cmd": "npm ci --cache .npm-cache",
       "exitCode": 0
     },
     {
-      "cmd": "npm run e2e (initial missing FFmpeg attempt)",
-      "exitCode": 1
+      "cmd": "node --check scripts/setup.mjs",
+      "exitCode": 0
     },
     {
-      "cmd": "npm run demo (suggestion cleanup race, subsequently fixed)",
+      "cmd": "npm run e2e（中文首次重置同步问题，已修复）",
       "exitCode": 1
     },
     {
@@ -66,23 +76,32 @@
       "exitCode": 0
     },
     {
+      "cmd": "npm run doctor",
+      "exitCode": 0
+    },
+    {
       "cmd": "npm run e2e",
       "exitCode": 0
     },
     {
       "cmd": "npm run demo",
       "exitCode": 0
+    },
+    {
+      "cmd": "node scripts/doctor.mjs --root=<项目内临时缺依赖样例>（预期失败）",
+      "exitCode": 1
     }
   ],
   "liveModel": false,
   "fixturesUsed": true,
-  "demoVideo": "artifacts/playwright/demo-real-red-\u2192-locator-only-repair-\u2192-green/video.webm",
+  "demoVideo": "artifacts/playwright/demo-real-red-→-locator-only-repair-→-green/video.webm",
   "limitations": [
-    "HEURISTIC / NO AI; no live model integration or inference.",
-    "Single known locator rename in a synthetic local fixture, not general self-healing.",
-    "Single in-memory workflow; fixed artifact paths are replaced on rerun.",
-    "Validation reused an existing Chromium executable read-only through PLAYWRIGHT_EXECUTABLE_PATH and project-local FFmpeg.",
-    "Fresh-machine full browser download was interrupted; fresh installation and other operating systems remain unverified."
+    "本地样例与启发式规则，不调用模型，无需密钥。",
+    "仅支持一个已知定位器改名，不是通用测试修复工具。",
+    "单个内存工作流；重复运行会覆盖证据。",
+    "本机只读复用已有 Chromium，使用项目内 FFmpeg；未重复下载完整浏览器。",
+    "npm ci 已实测；setup 通过语法检查，全新机器完整安装及 Windows/Linux 运行未验证。",
+    "Node 支持范围与锁定依赖一致：22.12+（22.x）、24.x 或 26+。"
   ],
   "verificationEnvironment": {
     "browser": "existing Chromium headless shell via PLAYWRIGHT_EXECUTABLE_PATH",
@@ -92,6 +111,7 @@
   "priorFailureEvidence": [
     "artifacts/e2e-attempt-1.log",
     "artifacts/demo-race-failure.log",
-    "artifacts/playwright-race-failure/"
+    "artifacts/playwright-race-failure/",
+    "artifacts/zh-e2e-attempt-1.log"
   ]
 }

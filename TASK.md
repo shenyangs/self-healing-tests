@@ -1,25 +1,21 @@
-# A10 — Self-Healing Tests
+# A10 — 测试自修复实验室
 
-Build a REAL red -> repair -> green Playwright test repair demonstration, with strict guardrail: ONLY update one broken locator in a local fixture test, NEVER change assertions to cheat. Read ./AGENTS.md.
+交付真实的 Playwright 红灯 → 修复 → 绿灯闭环，只允许修改本地样例测试中的一个定位器，绝不通过改变断言来作弊。
 
-## Setup / strict scope
-- Two versions of local fixture site. V1 button has `data-testid="save-user"`; V2 renames the same semantic button to `data-testid="save-profile"`, preserving actual save behavior. Initial Playwright test expects the old test ID and has a meaningful assertion `Saved successfully`.
-- `Run broken test` executes actual test against V2, captures failure output and screenshot. `Suggest repair` inspects DOM and chooses ONE supported locator edit, optionally via live LLM if `OPENAI_API_KEY` configured, else deterministic rule with prominent label 'HEURISTIC / NO AI'. Validate that replacement targets exactly one actionable element.
-- `Apply + rerun` modifies only the allowlisted locator string in `fixtures/tests/save.spec.ts`, not assertions/test skip. Run Playwright again. Show real red/green exit status, concise actual diff, proof that assertion still exists. Restore/reset fixture before repeat.
-- No generated code arbitrary execution, user filesystem scans or external sites.
+## 核心规格
 
-## P0 happy path
-1. Press Run -> real failing test with missing locator and error output.
-2. Press Suggest -> show exact `getByTestId('save-user')` to `getByTestId('save-profile')` candidate with reason and constraints.
-3. Press Apply -> actual test file patch; rerun -> green only if actual test and existing assertion pass. Show test output + Git diff.
+- V1 按钮标识为 `save-user`，V2 为 `save-profile`；均执行实际页面保存，状态变为“保存成功”。
+- “运行失败测试”恢复原始测试并真实运行 V2，保存失败日志、截图和退出码。
+- “获取修复建议”检查真实 DOM，验证目标唯一、可见、启用。当前采用确定性启发式规则，明确标注“本地样例 / 无 AI 推理”，不调用模型。
+- “应用并重新验证”只允许在 `fixtures/tests/save.spec.ts` 中将 `getByTestId('save-user')` 替换为 `getByTestId('save-profile')`。保存断言必须完全不变。
+- 真实测试通过才显示绿灯，展示实际文件差异和结果；支持重新从第一步开始。
 
-## Must prove
-- Unit test patch rejects attempts to change assertions, skip tests, replace selector with `body`, or patch outside allowlisted test file.
-- E2E orchestrates break/fix flow and reads captured failure and success evidence; demo screencast and screenshot.
-- README explicitly says locator-only POC, not general automatic test healing, and labels no-model heuristic correctly.
+## 必须验证
 
-## X hook
-'I renamed a button. The test failed. One locator changed. The SAME assertion passed again.' Show red output → actual one-line diff → green output.
+防篡改单元测试拒绝修改断言、跳过测试、body 选择器、越界文件及被篡改的原始源码。端到端测试读取真实失败和通过证据，验证 V1/V2 行为、重复运行与中文小屏/键盘使用。demo 必须录制实际操作。
 
+## 易用性与交付
 
-Execute within this directory only. Run npm install, implement, then build/test/e2e/demo. Preserve real logs and status.json.
+保持 TypeScript、React、Vite、Express、Playwright 栈，仅监听 127.0.0.1，网页端口 4210、API 5210。中文默认界面、错误提示、引导和 README。提供跨平台 `npm run setup`、中文 `npm run doctor`，无需密钥。安装只写项目目录，不修改机器设置。
+
+必须实际执行 build/test/e2e/demo，保留 artifacts 真实日志、截图和录屏；status.json 如实记录。提供中文依赖/安装/恢复说明、MIT LICENSE、锁文件与独立 Git 提交。不提交缓存、依赖、凭据、日志、录屏或私人路径。

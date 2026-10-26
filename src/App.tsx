@@ -1,0 +1,1 @@
+export default function App() { return <main className='container'><div className='eyebrow'>AI X Sprint · self-healing-tests</div><h1>self-healing-tests</h1><p className='muted'>Starter only. Coding agent must implement and test a real P0 workflow.</p></main>; }

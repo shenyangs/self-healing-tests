@@ -35,9 +35,33 @@ test('中文小屏与键盘入口',async({page,request})=>{
  await expect(page.locator('html')).toHaveAttribute('lang','zh-CN');
  await expect(page.getByText('本地样例 · 启发式规则 / 无 AI 推理')).toBeVisible();
  await page.keyboard.press('Tab');
+ await expect(page.getByRole('link',{name:'跳到代码审阅'})).toBeFocused();
+ await page.keyboard.press('Tab');
  await expect(page.getByRole('button',{name:/运行失败测试/})).toBeFocused();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
  const response=await request.post('http://127.0.0.1:5210/api/invalid');
  expect(response.status()).toBe(404);expect((await response.json()).error).toBe('不支持此操作。');
  await page.screenshot({path:'artifacts/zh-mobile.png',fullPage:true});
+});
+
+
+test('empty, pending and recoverable network error states',async({page})=>{
+ await page.goto('/');
+ const run=page.getByRole('button',{name:/运行失败测试/});
+ await expect(page.getByTestId('red-output')).toContainText('尚无执行结果');
+ await expect(page.getByRole('button',{name:/获取修复建议/})).toBeDisabled();
+ let release!:()=>void;
+ const pending=new Promise<void>(resolve=>{release=resolve});
+ await page.route('**/api/run',async route=>{await pending;await route.abort('failed')});
+ await run.click();
+ await expect(page.getByRole('button',{name:/正在运行浏览器/})).toBeDisabled();
+ await expect(page.getByRole('status')).toHaveText('正在执行');
+ release();
+ await expect(page.getByRole('alert')).toContainText('操作未完成');
+ await expect(run).toBeEnabled();
+ await expect(page.getByTestId('green-output')).toContainText('等待应用补丁');
+ await page.unroute('**/api/run');
+ await run.click();
+ await expect(page.getByTestId('red-output')).toContainText('1 failed',{timeout:30000});
+ await expect(page.getByRole('alert')).toHaveCount(0);
 });

@@ -6,27 +6,27 @@
     {
       "id": "中文构建",
       "passed": true,
-      "evidence": "artifacts/zh-build.log"
+      "evidence": "artifacts/browser-build.log"
     },
     {
-      "id": "7项单元测试与缺依赖诊断",
+      "id": "9项单元测试含浏览器定位与缺依赖诊断",
       "passed": true,
-      "evidence": "artifacts/zh-test.log"
+      "evidence": "artifacts/browser-test.log"
     },
     {
       "id": "4项端到端测试含中文小屏键盘",
       "passed": true,
-      "evidence": "artifacts/zh-e2e.log"
+      "evidence": "artifacts/browser-e2e.log"
     },
     {
       "id": "独立中文录屏演示",
       "passed": true,
-      "evidence": "artifacts/zh-demo.log"
+      "evidence": "artifacts/browser-demo.log"
     },
     {
       "id": "真实浏览器与端口诊断",
       "passed": true,
-      "evidence": "artifacts/zh-doctor.log"
+      "evidence": "artifacts/browser-doctor.log"
     },
     {
       "id": "缺依赖中文恢复指引",
@@ -104,14 +104,16 @@
     "Node 支持范围与锁定依赖一致：22.12+（22.x）、24.x 或 26+。"
   ],
   "verificationEnvironment": {
-    "browser": "existing Chromium headless shell via PLAYWRIGHT_EXECUTABLE_PATH",
+    "browser": "automatically discovered system Playwright Chromium headless shell; no environment overrides",
     "ffmpeg": "project-local .browsers/ffmpeg-1013",
-    "date": "2026-10-26"
+    "date": "2026-10-26",
+    "environmentOverrides": false
   },
   "priorFailureEvidence": [
     "artifacts/e2e-attempt-1.log",
     "artifacts/demo-race-failure.log",
     "artifacts/playwright-race-failure/",
-    "artifacts/zh-e2e-attempt-1.log"
+    "artifacts/zh-e2e-attempt-1.log",
+    "artifacts/independent-zh-flow-failure/"
   ]
 }

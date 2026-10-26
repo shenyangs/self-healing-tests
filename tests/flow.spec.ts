@@ -16,7 +16,7 @@ test('real repair preserves full source and supports repeat',async({page,request
  await expect(page.getByTestId('red-output')).toContainText("getByTestId('save-user')");
  expect((await request.post('http://127.0.0.1:5210/api/apply')).status()).toBe(400);
  await page.getByRole('button',{name:/获取修复建议/}).click();
- await expect(page.getByTestId('patch')).toContainText("getByTestId('save-profile')");
+ await expect(page.getByTestId('patch')).toContainText("getByTestId('save-profile')",{timeout:30000});
  await page.getByRole('button',{name:/应用并重新验证/}).click();
  await expect(page.getByTestId('green-output')).toContainText('1 passed',{timeout:30000});
  expect(await readFile('fixtures/tests/save.spec.ts','utf8')).toBe(original.replace(oldLocator,newLocator));

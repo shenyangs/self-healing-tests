@@ -1,4 +1,5 @@
 import express from 'express';
+import {configureBrowser} from '../scripts/browser.mjs';
 import { createTwoFilesPatch } from 'diff';
 import { chromium } from '@playwright/test';
 import { spawn } from 'node:child_process';
@@ -6,7 +7,7 @@ import { mkdir, writeFile, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { original, allowedPath, oldLocator, newLocator, validatePatch } from './repair';
 const root = process.cwd();
-process.env.PLAYWRIGHT_BROWSERS_PATH ||= path.join(root, '.browsers');
+const browserConfig=configureBrowser();
 const app = express(); app.use(express.json({limit:'10kb'}));
 app.use('/api/artifacts',express.static(path.join(root,'artifacts')));
 app.get('/api/health', (_req,res) => res.json({ ok:true, project:'self-healing-tests' }));
@@ -36,7 +37,7 @@ app.post('/api/:action',async(req,res)=>{
   const result=await runTest('red');stage=result.exitCode!==0 && result.output.includes("getByTestId('save-user')") && result.output.includes('Timeout')?'red':'unexpected';res.json({...result,stage,assertion:"toHaveText('保存成功')"});
  }else if(action==='suggest'){
   if(stage!=='red')throw new Error('请先运行失败测试。');
-  const browser=await chromium.launch({executablePath:process.env.PLAYWRIGHT_EXECUTABLE_PATH});
+  const browser=await chromium.launch({executablePath:browserConfig.executablePath,timeout:10000});
   let payload;
   try{const page=await browser.newPage();await page.goto('http://127.0.0.1:5210/fixture/v2');
    const candidate=page.getByRole('button',{name:'保存资料',exact:true});

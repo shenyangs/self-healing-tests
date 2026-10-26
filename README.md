@@ -74,7 +74,9 @@ Linux 若缺少浏览器系统库，`doctor` 会报告浏览器不可用；本�
 - API 不可达或流程失败：确认 `npm run dev` 正在运行，查看界面中文提示和原始日志，再点击第一步。不要改断言来消除失败。
 - 后端重启：内存状态丢失，从第一步重新开始。
 
-可只读复用已有兼容 Chromium，避免重复下载：设置 `PLAYWRIGHT_EXECUTABLE_PATH` 为浏览器可执行文件的实际路径，仍需 `.browsers` 中具备本 Playwright 版本所需 FFmpeg；也可设置 `PLAYWRIGHT_BROWSERS_PATH` 指向兼容缓存。macOS/Linux 使用 `export VARIABLE="路径"`；PowerShell 使用 `$env:VARIABLE = '路径'`。不要照抄别人的私有绝对路径。`setup` 始终将新安装写入项目 `.browsers`。
+`dev`、`doctor`、`e2e` 和 `demo` 共用浏览器自动定位：优先显式环境变量，再检查项目 `.browsers`，最后只读查找系统标准 Playwright 缓存（macOS、Linux、Windows 路径分别推导）。缓存中优先选择当前 Chromium revision；其他版本是否兼容由 doctor 的真实启动和录屏检查确认。FFmpeg 必须匹配当前 Playwright revision，可来自项目目录或标准缓存。本机无需设置环境变量即可运行。
+
+如需指定浏览器，可设置 `PLAYWRIGHT_EXECUTABLE_PATH` 为实际可执行文件路径；也可设置 `PLAYWRIGHT_BROWSERS_PATH` 指向包含当前 FFmpeg 的兼容缓存。显式无效的可执行文件路径会报错，不会静默替换。macOS/Linux 使用 `export VARIABLE="路径"`；PowerShell 使用 `$env:VARIABLE = '路径'`。不要照抄别人的私有绝对路径。`setup` 始终将新安装写入项目 `.browsers`。
 
 ## 真实验证与证据
 
@@ -87,19 +89,19 @@ npm run e2e
 npm run demo
 ```
 
-本次中文验收：build 通过、单元测试 7/7、E2E 4/4、独立 demo 1/1；doctor 正常环境检查通过，缺依赖路径返回预期的中文错误和退出码 1。实际 npm ci 已成功，setup 脚本通过语法检查，但未重复执行完整浏览器下载；全新安装仍属未验证。
+本次自动浏览器验收（未设置浏览器环境变量）：build 通过、单元测试 9/9、E2E 4/4、独立 demo 1/1；doctor 正常环境检查通过，缺依赖路径返回预期的中文错误和退出码 1。实际 npm ci 已成功，setup 脚本通过语法检查，但未重复执行完整浏览器下载；全新安装仍属未验证。
 
 E2E/demo 自行启动服务器，单 worker 执行。包括 V1/V2 保存行为、红→绿闭环、源码精确相等、非法操作顺序、重置、中文窄屏与键盘入口验证。断言始终是 `toHaveText('保存成功')`，运行时修复只允许 locator 改名。
 
-- `artifacts/zh-build.log`、`zh-test.log`、`zh-e2e.log`、`zh-demo.log`：中文版本验收的真实命令输出。
-- `artifacts/zh-doctor.log`：实际浏览器与环境诊断。
+- `artifacts/browser-build.log`、`browser-test.log`、`browser-e2e.log`、`browser-demo.log`：自动浏览器版本验收的真实命令输出。
+- `artifacts/browser-doctor.log`：无环境变量覆盖的实际浏览器与录屏诊断。
 - `artifacts/red/` / `green/`：退出码、原始输出、执行源码、浏览器截图/视频/trace。
 - `artifacts/green/repair.diff`：真实源码差异。
 - `artifacts/playwright/`：最近一次演示的真实录屏；每次 e2e/demo 会覆盖此目录。
 - `artifacts/verified.png`：中文演示截图；`artifacts/zh-mobile.png`：窄屏截图。
 - `status.json`：最终实际检查结果和未验证项。
 
-工具原始日志、代码标识与 diff 保留原文，避免篡改证据。预期红灯的退出码 1 是演示成功所需的中间结果。历史失败证据保留在 artifacts 中，未提交 Git。中文版本首次 E2E 发现重置后读取旧日志导致后续请求遇到忙碌状态，已清空旧结果并显式等待新请求完成；失败日志为 `artifacts/zh-e2e-attempt-1.log`。首次验收曾缺 FFmpeg，后安装解决；后续曾发现建议响应早于浏览器清理的竞态，现已修正。
+工具原始日志、代码标识与 diff 保留原文，避免篡改证据。预期红灯的退出码 1 是演示成功所需的中间结果。历史失败证据保留在 artifacts 中，未提交 Git。中文版本首次 E2E 发现重置后读取旧日志导致后续请求遇到忙碌状态，已清空旧结果并显式等待新请求完成；失败日志为 `artifacts/zh-e2e-attempt-1.log`。独立复验还发现高负载时建议生成超过默认 5 秒断言等待；现显式等待真实建议结果最多 30 秒，未修改断言内容，失败证据保存在 `artifacts/independent-zh-flow-failure/`。首次验收曾缺 FFmpeg，后安装解决；后续曾发现建议响应早于浏览器清理的竞态，现已修正。
 
 ## 能力边界
 

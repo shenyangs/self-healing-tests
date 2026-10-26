@@ -18,11 +18,10 @@ if(!missing.length){
  try{
   const require=createRequire(path.join(root,'package.json'));
   require.resolve('@playwright/test');
-  process.env.PLAYWRIGHT_BROWSERS_PATH ||= path.join(root,'.browsers');
-  // Playwright reads the browser location when imported; set it before the child probe instead.
   const {spawnSync}=await import('node:child_process');
   const probe=spawnSync(process.execPath,[path.join(ownRoot,'scripts/probe-browser.mjs')],{cwd:root,env:{...process.env},encoding:'utf8',timeout:20000});
-  report(probe.status===0,probe.status===0?'Chromium 启动和 FFmpeg 录屏检查通过':'浏览器或录屏组件不可用。运行 npm run setup；复用浏览器时同时配置 PLAYWRIGHT_EXECUTABLE_PATH。');
+  if(probe.status===0)console.log(probe.stdout.trim());
+  report(probe.status===0,probe.status===0?'Chromium 启动和 FFmpeg 录屏检查通过':'浏览器或录屏组件不可用。运行 npm run setup；也可检查显式设置的浏览器路径与缓存。');
   if(probe.status!==0)console.log((probe.stderr||probe.error?.message||'检查超时').slice(-1500));
  }catch{report(false,'无法加载 Playwright，请运行 npm ci --cache .npm-cache。')}
 }
